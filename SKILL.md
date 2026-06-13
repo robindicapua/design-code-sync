@@ -175,17 +175,27 @@ For each discrepancy, update Figma variable bindings via figma-cli. Read `refere
 Key eval patterns:
 
 ```javascript
-// Rebind a fill to a different variable
+// Rebind a fill color to a different variable
+// setBoundVariableForPaint is PURE — it returns a new paint, it does NOT mutate.
+// Always assign the return value back; never discard it.
 const newVar = allVars.find(v => v.name === 'theme/color/border/default');
-node.setBoundVariable('fills', figma.variables.createVariableAlias(newVar));
+node.fills = node.fills.map(p => figma.variables.setBoundVariableForPaint(p, 'color', newVar));
 
-// Set stroke color
-node.setBoundVariable('strokes', figma.variables.createVariableAlias(newVar));
+// Rebind a stroke color to a different variable — same pure-function rule
+node.strokes = node.strokes.map(p => figma.variables.setBoundVariableForPaint(p, 'color', newVar));
 
-// Set strokeWeight
+// Set a scalar property (strokeWeight, opacity, etc.) — different API, still correct
 const bwVar = allVars.find(v => v.name === 'border-width/1');
 node.setBoundVariable('strokeWeight', figma.variables.createVariableAlias(bwVar));
 ```
+
+> **Paint binding rule — never get this wrong:**
+> `setBoundVariableForPaint(paint, field, variable)` returns a **new paint object**.
+> The original paint is unchanged. The correct pattern is always:
+> ```javascript
+> node.strokes = node.strokes.map(p => figma.variables.setBoundVariableForPaint(p, 'color', myVar));
+> ```
+> Calling it without using the return value is a silent no-op — no error, no effect.
 
 #### Figma → Code
 
