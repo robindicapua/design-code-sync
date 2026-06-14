@@ -143,6 +143,38 @@ for (const variant of set.children) {
 
 ---
 
+## 8. Un-tokenized Mantine base style vs. Figma "no property" 🔴
+
+**What it is:** Mantine's own compiled CSS (`@mantine/core/styles/*.css`) sets a visual
+property (fill, border, etc.) using Mantine's own theme variables (`--mantine-color-*`),
+not a `--ds-*` token. Neither side's extraction catches it: code-side scanning only looks
+for `var(--ds-*)` in our `.module.css` / `vars` prop, and Figma correctly has no binding
+(or `fills: []`) for that property — so there's nothing to compare on either side, and
+the audit reports "in sync" by omission.
+
+**Examples seen:**
+- Checkbox's `.input` had no `background-color` override. Mantine's `Checkbox.css` sets
+  `:where([data-mantine-color-scheme='light']) .m_26063560 { background-color:
+  var(--mantine-color-white); }` on the unchecked input — giving it an opaque white fill.
+  Figma's `Unchecked, State=Default` Control has `fills: []` (no fill, transparent) and
+  `checkbox.layla` confirms only `.stroke(...)`, no `.color(...)`. Radio has the identical
+  pattern via `Radio.css`'s `.m_8a3dbb89` base rule.
+
+**Detection:** For each component, grep the relevant `@mantine/core/styles/*.css` file
+for base (non-`:checked`/`:disabled`) rules on the styles-API class that sets
+`background-color`/`border-color`/`color` from a `--mantine-*` variable, and check
+whether our `.module.css` overrides it. Cross-reference against the Figma binding (or
+absence of one) for the equivalent property on the corresponding node.
+
+**Fix (Figma → Code or Layla → Code):** Add an explicit override in the component's
+`.module.css` — e.g. `background-color: transparent;` to neutralize Mantine's default,
+or `background-color: var(--ds-theme-color-...)` if Figma/Layla specify an actual fill.
+Verify specificity: Mantine's `:checked`/`:disabled` rules are typically `(0,2,0)` and
+will still win over a base-class `(0,1,0)` override, so this is safe to add without
+breaking other states — but confirm with a rendered screenshot.
+
+---
+
 ## Property-to-Figma-binding map
 
 Reference for which CSS properties correspond to which Figma `boundVariables` keys:
