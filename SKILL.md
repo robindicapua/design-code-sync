@@ -184,7 +184,7 @@ Key eval patterns:
 // Rebind a fill color to a different variable
 // setBoundVariableForPaint is PURE — it returns a new paint, it does NOT mutate.
 // Always assign the return value back; never discard it.
-const newVar = allVars.find(v => v.name === 'theme/color/border/default');
+const newVar = allVars.find(v => v.name === 'color/border/default');
 node.fills = node.fills.map(p => figma.variables.setBoundVariableForPaint(p, 'color', newVar));
 
 // Rebind a stroke color to a different variable — same pure-function rule
