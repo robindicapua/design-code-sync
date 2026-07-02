@@ -8,8 +8,12 @@ CSS vars and Figma variable paths follow the same structure, just with different
 
 | Side | Format | Example |
 |------|--------|---------|
-| Code (CSS var) | `--ds-<path-with-dashes>` | `--ds-theme-color-border-default` |
-| Figma variable | `<path-with-slashes>` | `theme/color/border/default` |
+| Code (CSS var) | `--ds-<path-with-dashes>` | `--ds-color-border-default` |
+| Figma variable | `<path-with-slashes>` (in the matching collection) | `color/border/default` |
+
+The tier (Foundation vs Semantic) is **not** encoded in the name on either side — see
+"Foundation vs Semantic" below. In code both tiers are `--ds-<group>-*`; in Figma both live
+under `color/*`, `spacing/*`, … but in **separate collections** (Foundation, Semantic).
 
 ### CSS var → Figma path
 
@@ -17,11 +21,11 @@ CSS vars and Figma variable paths follow the same structure, just with different
 2. Replace `-` with `/`
 
 ```
---ds-theme-color-border-default  →  theme/color/border/default
---ds-theme-radius-default        →  theme/radius/default
---ds-border-width-1              →  border-width/1
---ds-typography-font-size-14     →  typography/font-size/14
---ds-spacing-4                   →  spacing/4
+--ds-color-border-default   →  color/border/default     (Semantic collection)
+--ds-radius-default         →  radius/default           (Semantic collection)
+--ds-color-gray-300         →  color/gray/300           (Foundation collection)
+--ds-border-width-1         →  border-width/1           (Foundation collection)
+--ds-spacing-4              →  spacing/4                (Foundation collection)
 ```
 
 ### Figma path → CSS var
@@ -30,9 +34,9 @@ CSS vars and Figma variable paths follow the same structure, just with different
 2. Replace `/` with `-`
 
 ```
-theme/color/interactive/brand/hover  →  --ds-theme-color-interactive-brand-hover
-theme/typography/label/font-weight   →  --ds-theme-typography-label-font-weight
-border-width/1                       →  --ds-border-width-1
+color/interactive/brand/hover   →  --ds-color-interactive-brand-hover   (Semantic)
+typography/label/font-weight    →  --ds-typography-label-font-weight    (Semantic)
+border-width/1                  →  --ds-border-width-1                  (Foundation)
 ```
 
 ## Ambiguous cases
@@ -42,10 +46,10 @@ border-width/1                       →  --ds-border-width-1
 Some token names contain hyphens that are part of the name (not separators). These survive the conversion intact:
 
 ```
---ds-theme-color-background-utility-error  →  theme/color/background/utility/error
---ds-theme-typography-body-font-family     →  theme/typography/body/font-family
---ds-theme-spacing-gap-xs                  →  theme/spacing/gap-xs
---ds-theme-spacing-content-md              →  theme/spacing/content-md
+--ds-color-background-utility-error  →  color/background/utility/error
+--ds-typography-body-font-family     →  typography/body/font-family
+--ds-spacing-gap-xs                  →  spacing/gap-xs
+--ds-spacing-content-md              →  spacing/content-md
 ```
 
 The bridge is purely mechanical — every `-` becomes `/` — so multi-word segment names like `gap-xs` become `gap/xs` in the Figma path, which is correct.
@@ -66,11 +70,24 @@ These do not have Figma equivalents. The Figma component uses direct variable bi
 
 ## Foundation vs Semantic
 
-Foundation tokens (no `theme/` prefix in Figma) should only appear in Figma as **intermediate aliases** — i.e. a Semantic variable references a Foundation variable. If a Figma component binding points directly to a Foundation token (e.g. `spacing/4`, `color/blue/600`), that is a **raw Foundation token** in Figma and should be flagged as drift.
+The tier is carried by **collection**, not by the token name. Figma has two variable collections:
+
+- **Foundation** (mode: single) — raw palette/scales, *scale*-named: `color/gray/300`, `color/blue/600`, `spacing/4`, `radius/8`.
+- **Semantic** (modes: Light / Dark) — roles, *role*-named: `color/background/default`, `color/border/default`, `color/interactive/brand/*`, `color/content/*`. Each aliases a Foundation variable.
+
+Both collections use the same top-level groups (`color/`, `spacing/`, …), so tell them apart by
+the **collection** a variable belongs to and by how the name reads — a **role** (`background`,
+`content`, `interactive`) is Semantic; a **scale** (`gray/300`, `blue/600`, `4`) is Foundation.
+This mirrors the code side, where both tiers are `--ds-<group>-*` and role-vs-scale marks the tier
+(there is no `theme`/`semantic` segment in the name).
+
+Foundation variables should only appear in Figma as **intermediate aliases** — i.e. a Semantic
+variable references a Foundation variable. If a component binding points **directly** to a
+Foundation-collection variable, that is a raw Foundation token and should be flagged as drift.
 
 ```
-✅ component → theme/color/border/default → color/gray/300  (via semantic alias)
-🔴 component → color/gray/300  (raw Foundation — no semantic alias)
+✅ component → color/border/default (Semantic) → color/gray/300 (Foundation)   [via semantic alias]
+🔴 component → color/gray/300 (Foundation)                                      [raw — no semantic alias]
 ```
 
 ## Alias resolution helper (figma-cli)

@@ -33,8 +33,8 @@ for (const mode of semanticCollection.modes) {
 **What it is:** The same concept is bound on both sides but the token names follow a different structure. Values may match but paths don't.
 
 **Examples seen:**
-- Code used `--ds-theme-typography-font-family-body` (property→role), Figma used `theme/typography/label/font-family` (role→property). After restructuring to role-first DTCG, both sides aligned.
-- Code used `--ds-theme-typography-heading-fontFamily` (camelCase), Figma used `theme/typography/heading/font-family` (kebab path).
+- Code used `--ds-typography-font-family-body` (property→role), Figma used `typography/label/font-family` (role→property). After restructuring to role-first DTCG, both sides aligned.
+- Code used `--ds-typography-heading-fontFamily` (camelCase), Figma used `typography/heading/font-family` (kebab path).
 
 **Detection:** After applying the naming bridge, the code var converts to a Figma path that doesn't exist — but a variable with the same resolved value does exist under a different path.
 
@@ -84,7 +84,7 @@ inputNode.setBoundVariable('fills', figma.variables.createVariableAlias(bgVar));
 **Fix (Figma → Code):** Add the CSS property to the relevant class in the component's `.module.css`:
 ```css
 .label {
-  line-height: var(--ds-theme-typography-label-line-height);
+  line-height: var(--ds-typography-label-line-height);
 }
 ```
 
@@ -168,7 +168,7 @@ absence of one) for the equivalent property on the corresponding node.
 
 **Fix (Figma → Code or Layla → Code):** Add an explicit override in the component's
 `.module.css` — e.g. `background-color: transparent;` to neutralize Mantine's default,
-or `background-color: var(--ds-theme-color-...)` if Figma/Layla specify an actual fill.
+or `background-color: var(--ds-color-...)` if Figma/Layla specify an actual fill.
 Verify specificity: Mantine's `:checked`/`:disabled` rules are typically `(0,2,0)` and
 will still win over a base-class `(0,1,0)` override, so this is safe to add without
 breaking other states — but confirm with a rendered screenshot.

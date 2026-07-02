@@ -34,9 +34,15 @@ Find the component folder at `packages/ui/src/components/<kebab-name>/`. Collect
 2. **`<name>.tsx`** — scan `vars` prop for Mantine inline CSS variable overrides (e.g. `--button-bg`, `--button-hover`)
 3. **`<name>.metadata.yaml`** — optional; may list expected variants and composition info
 
-Extract all unique token references. Classify each as Foundation or Semantic:
-- Starts with `--ds-theme-` → **Semantic**
-- Starts with `--ds-` (no `theme`) → **Foundation**
+Extract all unique token references. Both tiers share the `--ds-<group>-*` prefix (there is
+no `theme`/`semantic` segment), so classify by how the name reads:
+- **Semantic** — a *role* name: `--ds-color-background-*`, `--ds-color-content-*`,
+  `--ds-color-border-*`, `--ds-color-interactive-*`, `--ds-spacing-content-*`,
+  `--ds-spacing-gap-*`, etc. These map to the Figma **Semantic** collection.
+- **Foundation** — a *scale* name: `--ds-color-<palette>-<step>` (`--ds-color-gray-300`,
+  `--ds-color-blue-600`), `--ds-spacing-<n>` (`--ds-spacing-4`), `--ds-radius-<n>`,
+  `--ds-border-width-<n>`. These map to the Figma **Foundation** collection — a component
+  should reference them only via a semantic alias (see `references/token-naming-bridge.md`).
 
 ### Step 2: Locate the Figma component set
 
