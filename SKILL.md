@@ -32,7 +32,7 @@ Find the component folder at `packages/ui/src/components/<kebab-name>/`. Collect
 
 1. **`<name>.module.css`** — primary token source; scan every `var(--ds-*)` reference
 2. **`<name>.tsx`** — scan `vars` prop for Mantine inline CSS variable overrides (e.g. `--button-bg`, `--button-hover`)
-3. **`<name>.metadata.yaml`** — optional; may list expected variants and composition info
+3. **`<name>.spec.yaml`** — optional; may list expected variants and composition info
 
 Extract all unique token references. Both tiers share the `--ds-<group>-*` prefix (there is
 no `theme`/`semantic` segment), so classify by how the name reads:
